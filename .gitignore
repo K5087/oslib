@@ -1,0 +1,17 @@
+# ignore all file
+/*
+
+# cmake
+!CMakeLists.txt
+
+# include 
+!include/
+
+# src
+!src/
+
+# test
+!test/
+
+# git
+!.gitignore
