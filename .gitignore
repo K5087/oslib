@@ -1,0 +1,19 @@
+# ignore all file
+/*
+
+# cmake
+!cmake/
+!CMakeLists.txt
+
+# include 
+!include/
+
+# src
+!src/
+
+# test
+!test/
+
+# git
+!.gitignore
+!README.md
