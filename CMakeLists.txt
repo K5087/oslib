@@ -22,6 +22,7 @@ file(
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/common/log)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/common/cmd)
+add_subdirectory(${PROJECT_SOURCE_DIR}/src/common/argp)
 
 add_library(os_static STATIC ${SOURCE_FILE})
 target_include_directories(os_static PUBLIC ${INCLUDE_DIR})
@@ -29,7 +30,7 @@ target_include_directories(os_static PUBLIC ${INCLUDE_DIR})
 add_library(os_shared SHARED ${SOURCE_FILE})
 target_include_directories(os_shared PUBLIC ${INCLUDE_DIR})
 
-# include(CTest)
-# if(BUILD_TESTING)
-#     add_subdirectory(test)
-# endif()
+include(CTest)
+if(BUILD_TESTING)
+    add_subdirectory(test)
+endif()
