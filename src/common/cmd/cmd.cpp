@@ -1,7 +1,6 @@
 module os.cmd;
 import std;
-namespace os {
-namespace cmd {
+namespace os::cmd {
 std::string GetCommandStr(const Cmd &cmd) {
   std::string command;
   for (std::size_t i = 0; i < cmd.size(); i++) {
@@ -44,6 +43,5 @@ int run_cmd(const Cmd &cmd) {
   }
   return impl::run_cmd(cmd);
 }
-} // namespace cmd
 
-} // namespace os
+} // namespace os::cmd

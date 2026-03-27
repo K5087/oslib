@@ -1,4 +1,4 @@
-import os.argp
+import os.argp;
 import std;
 using namespace os::argp;
 void print_args(std::string_view header, std::vector<std::string_view> &args) {

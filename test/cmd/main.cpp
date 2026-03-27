@@ -1,4 +1,4 @@
-#include <cmd/cmd.h>
+import os.cmd;
 
 using namespace os::cmd;
 int main(int argc, char *argv[]) {
