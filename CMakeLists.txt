@@ -30,8 +30,9 @@ add_module_library(os_shared SHARED INCLUDE_DIR OS_SOURCE OS_MODULE)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/common/log)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/common/cmd)
+add_subdirectory(${PROJECT_SOURCE_DIR}/src/common/argp)
 
-
+#
 # include(CTest)
 # if(BUILD_TESTING)
 #     add_subdirectory(test)
