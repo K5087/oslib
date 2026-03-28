@@ -1,4 +1,5 @@
 #include <cmd/cmd.h>
+#include <stdexcept>
 
 namespace os {
 namespace cmd {

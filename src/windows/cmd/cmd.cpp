@@ -10,8 +10,9 @@ int run_cmd(const std::vector<std::string> &cmd) {
   BOOL result = CreateProcessA(NULL, GetCommandStr(cmd).data(), NULL, NULL,
                                TRUE, 0, NULL, NULL, &si, &pi);
   if (!result) {
-    loge("CreateProcess failed!");
-    return false;
+    throw std::runtime_error("CreateProcess failed!");
+    // loge("CreateProcess failed!");
+    // return false;
   }
   WaitForSingleObject(pi.hProcess, INFINITE);
   DWORD ec;

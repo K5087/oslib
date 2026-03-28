@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <string_view>
 #include <unordered_map>
 #include <vector>
@@ -53,7 +54,7 @@ private:
   std::vector<Option> options;
   std::vector<PosOption> posoptions;
 
-  std::unordered_map<std::string_view, size_t> index;
+  std::unordered_map<std::string_view, std::size_t> index;
 };
 
 } // namespace os::argp
