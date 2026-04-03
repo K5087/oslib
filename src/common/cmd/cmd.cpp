@@ -1,50 +1,65 @@
 #include <cmd/cmd.h>
-#include <stdexcept>
 
-namespace os {
-namespace cmd {
-std::string GetCommandStr(const Cmd &cmd) {
-  std::string command;
-  for (size_t i = 0; i < cmd.size(); i++) {
-    std::string_view arg = cmd[i];
-    if (i > 0)
-      command.append(" ");
-    if (!arg.empty() &&
-        std::string_view::npos == arg.find_first_of(" \t\n\v\"")) {
-      command.append(arg);
+#include <chrono>
+#include <semaphore>
+#include <stdexcept>
+#include <thread>
+
+namespace os::cmd {
+
+static std::vector<Proc> procs;
+static std::counting_semaphore<> sem(std::thread::hardware_concurrency() + 1);
+namespace impl {
+
+bool scan_procs() {
+  bool result = false;
+  for (auto iter = procs.begin(); iter != procs.end();) {
+    if (impl::is_running(*iter)) {
+      iter = procs.erase(iter);
+      sem.release();
+      result = true;
     } else {
-      command.append("\"");
-      size_t backslashes = 0;
-      for (size_t j = 0; j < arg.length(); ++j) {
-        switch (arg[j]) {
-        case '\\':
-          backslashes += 1;
-          break;
-        case '\"':
-          command.append(2 * backslashes + 1, '\\');
-          backslashes = 0;
-          command.push_back(arg[j]);
-          break;
-        default:
-          command.append(backslashes, '\\');
-          backslashes = 0;
-          command.push_back(arg[j]);
-          break;
-        }
-      }
-      command.append(2 * backslashes, '\\');
-      command.append("\"");
+      iter++;
     }
   }
-  return command;
+  return result;
 }
+} // namespace impl
 
-int run_cmd(const Cmd &cmd) {
+int run_cmd(const Cmd &cmd, Opt opt) {
+
   if (cmd.empty()) {
     throw std::runtime_error("Could not run empty command");
   }
-  return impl::run_cmd(cmd);
-}
-} // namespace cmd
+  impl::scan_procs();
 
-} // namespace os
+  while (!sem.try_acquire()) {
+    logi("cmd process num too much,wait someone quit");
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    impl::scan_procs();
+  }
+
+  Proc proc = impl::create_proc(cmd, opt);
+
+  if (!proc) {
+    sem.release();
+    throw std::runtime_error("create Process failed");
+  }
+
+  if (opt.wait_return) {
+    impl::Result ret = impl::wait_proc(proc);
+    sem.release();
+    if (!ret) {
+      // TODO: is this error handle right?
+      throw std::system_category().message(ret.error());
+    } else {
+      return *ret;
+    }
+  } else {
+    procs.push_back(proc);
+  }
+
+  return 0;
+}
+
+} // namespace os::cmd

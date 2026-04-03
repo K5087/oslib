@@ -5,14 +5,20 @@ project(os VERSION 0.0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
+set(INCLUDE_DIR
+    ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/include/common
+)
+
 if(UNIX)
-    set(SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/unix)
+    set(PLATFORM_NAME unix)
 elseif(WIN32)
-    set(SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/windows)
+    set(PLATFORM_NAME windows)
 else()
     message("not support system")
 endif()
+
+set(SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/${PLATFORM_NAME})
 
 file(
     GLOB_RECURSE SOURCE_FILE
