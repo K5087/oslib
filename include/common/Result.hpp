@@ -5,3 +5,7 @@ namespace os::handle {
 template <class Ty, class Err> using Result = std::expected<Ty, Err>;
 template <class Err> using Reason = std::unexpected<Err>;
 } // namespace os::handle
+
+#define DEFINE_RESULT(Ty, Err)                                                       \
+  using Result = os::handle::Result<Ty, Err>;                       \
+  using Reason = os::handle::Reason<Err>;

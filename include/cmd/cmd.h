@@ -1,5 +1,5 @@
 #pragma once
-#include <windows/cmd/cmd.h>
+#include <Result.hpp>
 
 #include <log/log.h>
 #include <string>
@@ -7,7 +7,6 @@
 
 namespace os::cmd {
 using Cmd = std::vector<std::string>;
-
 struct Opt {
   const char *fdin = nullptr;
   const char *fdot = nullptr;
@@ -16,6 +15,15 @@ struct Opt {
 };
 
 namespace impl {
+
+#ifdef _WIN32
+using Proc = void *;
+DEFINE_RESULT(int, unsigned long);
+#else
+using Proc = int;
+DEFINE_RESULT(int, int);
+#endif // _WIN32
+
 // create a process to run command
 Proc create_proc(const Cmd &cmd, const Opt &opt) noexcept;
 

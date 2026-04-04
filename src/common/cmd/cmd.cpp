@@ -7,8 +7,9 @@
 
 namespace os::cmd {
 
-static std::vector<Proc> procs;
+static std::vector<impl::Proc> procs;
 static std::counting_semaphore<> sem(std::thread::hardware_concurrency() + 1);
+
 namespace impl {
 
 bool scan_procs() {
@@ -39,7 +40,7 @@ int run_cmd(const Cmd &cmd, Opt opt) {
     impl::scan_procs();
   }
 
-  Proc proc = impl::create_proc(cmd, opt);
+  impl::Proc proc = impl::create_proc(cmd, opt);
 
   if (!proc) {
     sem.release();

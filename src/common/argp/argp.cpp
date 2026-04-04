@@ -6,7 +6,6 @@
 namespace os::argp {
 
 void PosOption::handle_rule(Parser &parser, int &index, int argc, char **argv) {
-
   switch (rule.boundary) {
   case Boundary::one_arg:
     args.push_back(argv[index]);
