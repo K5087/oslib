@@ -5,10 +5,7 @@ project(os VERSION 0.0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(INCLUDE_DIR
-    ${PROJECT_SOURCE_DIR}/include
-    ${PROJECT_SOURCE_DIR}/include/common
-)
+set(INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 
 if(UNIX)
     set(PLATFORM_NAME unix)

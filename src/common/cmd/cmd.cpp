@@ -2,7 +2,6 @@
 
 #include <chrono>
 #include <semaphore>
-#include <stdexcept>
 #include <thread>
 
 namespace os::cmd {
@@ -12,7 +11,7 @@ static std::counting_semaphore<> sem(std::thread::hardware_concurrency() + 1);
 
 namespace impl {
 
-bool scan_procs() {
+bool check_procs() {
   bool result = false;
   for (auto iter = procs.begin(); iter != procs.end();) {
     if (impl::is_running(*iter)) {
@@ -27,35 +26,32 @@ bool scan_procs() {
 }
 } // namespace impl
 
-int run_cmd(const Cmd &cmd, Opt opt) {
+std::optional<int> run_cmd(const Cmd &cmd, Opt opt) noexcept {
 
   if (cmd.empty()) {
-    throw std::runtime_error("Could not run empty command");
+    loge("Could not run empty command");
+    return std::nullopt;
   }
-  impl::scan_procs();
+
+  impl::check_procs();
 
   while (!sem.try_acquire()) {
     logi("cmd process num too much,wait someone quit");
     std::this_thread::sleep_for(std::chrono::seconds(2));
-    impl::scan_procs();
+    impl::check_procs();
   }
 
   impl::Proc proc = impl::create_proc(cmd, opt);
 
   if (!proc) {
     sem.release();
-    throw std::runtime_error("create Process failed");
+    return std::nullopt;
   }
 
   if (opt.wait_return) {
-    impl::Result ret = impl::wait_proc(proc);
+    auto ret = impl::wait_proc(proc);
     sem.release();
-    if (!ret) {
-      // TODO: is this error handle right?
-      throw std::system_category().message(ret.error());
-    } else {
-      return *ret;
-    }
+    return ret;
   } else {
     procs.push_back(proc);
   }

@@ -1,4 +1,5 @@
 #include <cmd/cmd.h>
+#include <error/category.h>
 #include <log/log.h>
 #include <windows.h>
 
@@ -40,20 +41,27 @@ std::string GetCommandStr(const Cmd &cmd) {
 }
 
 namespace impl {
-Proc create_proc(const Cmd &cmd, const Opt &opt) noexcept {
+void log_error(std::string_view msg, unsigned long ec) {
+  std::string str = std::string(msg) + std::system_category().message(ec);
+  loge(str.c_str());
+}
+
+Proc create_proc(const Cmd &cmd, const Opt &opt) {
+
   STARTUPINFO si = {sizeof(si)};
   PROCESS_INFORMATION pi;
 
-  BOOL result = CreateProcess(NULL, GetCommandStr(cmd).data(), NULL, NULL, TRUE,
-                              0, NULL, NULL, &si, &pi);
+  BOOL result = CreateProcessA(NULL, GetCommandStr(cmd).data(), NULL, NULL,
+                               TRUE, 0, NULL, NULL, &si, &pi);
   if (!result) {
+    error = GetLastError();
     return Proc(nullptr);
   }
   CloseHandle(pi.hThread);
   return Proc(pi.hProcess);
 }
 
-bool is_running(Proc proc) {
+bool is_running(Proc proc) noexcept {
   if (!proc) {
     return false; // is must need?
   }
@@ -65,17 +73,19 @@ bool is_running(Proc proc) {
   return false;
 }
 
-Result wait_proc(Proc proc) {
+std::optional<int> wait_proc(Proc proc) noexcept {
+
   DWORD result = WaitForSingleObject(proc, INFINITE);
   if (result == WAIT_FAILED) {
-    loge("couldn't wait child procress");
-    return Reason(GetLastError());
+    error = GetLastError();
+    return std::nullopt;
   }
   DWORD exit_status;
   if (!GetExitCodeProcess(proc, &exit_status)) {
-    loge("couldn't get child process exit code");
-    return Reason(GetLastError());
+    error = GetLastError();
+    return std::nullopt;
   }
+
   CloseHandle(proc);
   return exit_status;
 }
