@@ -51,8 +51,8 @@ Proc create_proc(const Cmd &cmd, const Opt &opt) {
   STARTUPINFO si = {sizeof(si)};
   PROCESS_INFORMATION pi;
 
-  BOOL result = CreateProcessA(NULL, GetCommandStr(cmd).data(), NULL, NULL,
-                               TRUE, 0, NULL, NULL, &si, &pi);
+  BOOL result = CreateProcess(NULL, GetCommandStr(cmd).data(), NULL, NULL, TRUE,
+                              0, NULL, NULL, &si, &pi);
   if (!result) {
     error = GetLastError();
     return Proc(nullptr);

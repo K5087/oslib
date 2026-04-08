@@ -29,7 +29,7 @@ using Proc = int;
 #endif // _WIN32
 
 // create a process to run command
-Proc create_proc(const Cmd &cmd, const Opt &opt);
+Proc create_proc(const Cmd &cmd, const Opt &opt) ;
 
 // check process is running
 bool is_running(Proc proc) noexcept;

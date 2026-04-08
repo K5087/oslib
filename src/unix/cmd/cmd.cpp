@@ -1,14 +1,14 @@
 #include <cmd/cmd.h>
 #include <log/log.h>
 #include <sys/wait.h>
-#include <system_error>
 
 namespace os::cmd::impl {
-int run_cmd(const Cmd &cmd) {
+
+Proc create_proc(const Cmd &cmd, const Opt &opt) {
   pid_t cpid = fork();
   if (cpid < 0) {
-    throw std::system_error(errno, std::generic_category(),
-                            "Could not fork child process");
+    perror("fork failed");
+    return Proc(0);
   }
   if (cpid == 0) {
     std::vector<char *> argv;
@@ -21,16 +21,32 @@ int run_cmd(const Cmd &cmd) {
     perror("execvp");
     _exit(127);
   }
-  if (cpid > 0) {
-    int status = 0;
-    if (waitpid(cpid, &status, 0) < 0) {
-      throw std::system_error(errno, std::generic_category(), "waitpid failed");
-    }
-    if (WIFEXITED(status)) {
-      return WEXITSTATUS(status);
-    }
-    return -1;
+  return cpid;
+}
+
+bool is_running(Proc proc) noexcept {
+  int status = 0;
+  pid_t result = waitpid(proc, &status, WNOHANG | WUNTRACED | WCONTINUED);
+  if (result == 0)
+    return true;
+  else if (result < 0)
+    return false;
+  if (WIFEXITED(status) || WIFSIGNALED(status))
+    return false;
+  else if (WIFSTOPPED(status) || WIFCONTINUED(status))
+    return true;
+  return true;
+}
+
+std::optional<int> wait_proc(Proc proc) noexcept {
+  int status = 0;
+  if (waitpid(proc, &status, 0) < 0) {
+    error = errno;
+    return std::nullopt;
   }
-  return -1;
+  if (WIFEXITED(status)) {
+    return WEXITSTATUS(status);
+  }
+  return std::nullopt;
 }
 } // namespace os::cmd::impl
