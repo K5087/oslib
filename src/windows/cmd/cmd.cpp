@@ -1,5 +1,4 @@
 #include <cmd/cmd.h>
-#include <error/category.h>
 #include <log/log.h>
 #include <windows.h>
 
@@ -41,11 +40,6 @@ std::string GetCommandStr(const Cmd &cmd) {
 }
 
 namespace impl {
-void log_error(std::string_view msg, unsigned long ec) {
-  std::string str = std::string(msg) + std::system_category().message(ec);
-  loge(str.c_str());
-}
-
 Proc create_proc(const Cmd &cmd, const Opt &opt) {
 
   STARTUPINFO si = {sizeof(si)};
