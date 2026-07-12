@@ -12,7 +12,7 @@ void PosOption::handle_rule(Parser &parser, int &index, int argc, char **argv) {
     break;
   case Boundary::another_rule:
     args.push_back(argv[index]);
-    while (index + 1 < argc && !parser.is_option(argv[index + 1])) {
+    while (index + 1 < argc && !parser.is_opt(argv[index + 1])) {
       index++;
       args.push_back(argv[index]);
     }
@@ -25,7 +25,7 @@ void Parser::parse(int argc, char **argv) {
   size_t pos = 0;
   for (int i = 1; i < argc; i++) {
     std::string_view arg = argv[i];
-    if (!is_option(arg)) {
+    if (!is_opt(arg)) {
       if (pos < posoptions.size()) {
         posoptions[pos].handle_rule(*this, i, argc, argv);
         pos++;
@@ -38,14 +38,14 @@ void Parser::parse(int argc, char **argv) {
       option.args.push_back(arg);
       break;
     case Boundary::one_arg:
-      if (i + 1 >= argc && is_option(argv[i + 1])) {
+      if (i + 1 >= argc && is_opt(argv[i + 1])) {
         throw std::invalid_argument(std::string(arg) + "need one param!");
       }
       option.args.push_back(argv[i + 1]);
       i++;
       break;
     case Boundary::another_rule:
-      while (i + 1 < argc && !is_option(argv[i + 1])) {
+      while (i + 1 < argc && !is_opt(argv[i + 1])) {
         option.args.push_back(argv[i + 1]);
         i++;
       }
@@ -54,8 +54,8 @@ void Parser::parse(int argc, char **argv) {
   }
 }
 
-void Parser::add_option(std::vector<std::string_view> keys,
-                        std::string_view help, Boundary boundary) {
+void Parser::add_opt(std::vector<std::string_view> keys, std::string_view help,
+                     Boundary boundary) {
 
   Option option;
   option.keys = keys;
@@ -70,12 +70,13 @@ void Parser::add_option(std::vector<std::string_view> keys,
 
   options.push_back(std::move(option));
 }
-void Parser::add_pos(std::string_view name, std::string_view help,
-                     Boundary boundary) {
+void Parser::add_pos(std::string_view name, bool required,
+                     std::string_view help, Boundary boundary) {
   PosOption option;
   option.name = name;
   option.help = help;
   option.rule = Rule(boundary);
+  option.required = required;
   posoptions.push_back(std::move(option));
 }
 
@@ -87,7 +88,7 @@ std::vector<std::string_view> &Parser::get_args(std::string_view key) {
 std::vector<std::string_view> &Parser::get_pos(size_t pos) {
   return posoptions[pos].args;
 }
-bool Parser::is_option(std::string_view arg) { return index.count(arg) != 0; }
+bool Parser::is_opt(std::string_view arg) { return index.count(arg) != 0; }
 
 void Parser::print_helper(std::string_view name) {
   std::cout << "Usage: " << name;

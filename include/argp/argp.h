@@ -39,16 +39,17 @@ class Parser {
 public:
   void parse(int argc, char **argv);
 
-  void add_option(std::vector<std::string_view> keys, std::string_view help,
-                  Boundary boundary);
-  void add_pos(std::string_view name, std::string_view help, Boundary boundary);
+  void add_opt(std::vector<std::string_view> keys, std::string_view help,
+               Boundary boundary);
+  void add_pos(std::string_view name, bool required, std::string_view help,
+               Boundary boundary);
 
   std::vector<std::string_view> &get_args(std::string_view key);
   std::vector<std::string_view> &get_pos(size_t pos);
 
   void print_helper(std::string_view name);
 
-  bool is_option(std::string_view arg);
+  bool is_opt(std::string_view arg);
 
 private:
   std::vector<Option> options;
